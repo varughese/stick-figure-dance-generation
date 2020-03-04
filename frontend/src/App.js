@@ -24,21 +24,39 @@ const jawn = {"nose": 0,
 "right_ankle": 15 }
 
 class Canvas extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { frame: 1 };
+  }
   componentDidMount() {
     const canvas = this.refs.canvas
     this.ctx = canvas.getContext("2d");
     this.ctx.lineWidth = 10;
-    this.drawDance(data);
+    // this.drawDance(data);
+
   }
 
-  drawDance(data) {
+  nextFrame() {
+    this.drawFrame(this.state.frame);
+    this.setState({
+      frame: this.state.frame + 1
+    });
+  }
+
+  drawDance() {
+    this.setState({frame: 1 });
     for(let frame=1; frame<data.length; frame++) {
       setTimeout(() => {
-        this.ctx.clearRect(0, 0, 2000, 1000);
-        for(let p=0; p<data[frame].length; p++) {
-            this.drawPerson(data[frame][p]);
-        }
+        this.setState({frame: frame });
+        this.drawFrame(frame);
       }, 70*frame);
+    }
+  }
+
+  drawFrame(frame_no) {
+    this.ctx.clearRect(0, 0, 2000, 1000);
+    for(let p=0; p<data[frame_no].length; p++) {
+        this.drawPerson(data[frame_no][p]);
     }
   }
 
@@ -113,6 +131,9 @@ class Canvas extends React.Component {
     return(
       <div>
         <canvas className="stick-figure-canvas" ref="canvas" width={2000} height={1000} />
+        <button onClick={this.drawDance.bind(this)}>Play (the animation is fucked)</button> 
+        <button onClick={this.nextFrame.bind(this)}>Draw Next Frame</button> 
+        Frame { this.state.frame }
       </div>
     )
   }

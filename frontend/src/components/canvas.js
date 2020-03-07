@@ -1,37 +1,36 @@
 import React, { Component } from "react";
 const ReactAnimationFrame = require('react-animation-frame');
 // const data = require("../data/yimGp0XUcEE_motion.json");
-const data = require("../data/ballet_XwmwsGT8IQ4_motion.json");
-
-/*  To animate in Javascript, you used "requestAnimationFrame". 
-  * Read more here - https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
-*/
-
-// this is really bad janky code
+const data = require("../data/y6kboFhoxow_motion.json");
 
 
-const jawn = {"nose": 0,
-"left_eye": 1,
-"right_eye": 2,
-"left_ear": 3,
-"right_ear": 4,
-"left_shoulder": 4,
-"right_shoulder": 5,
-"left_elbow": 6,
-"right_elbow": 7,
-"left_wrist": 8,
-"right_wrist": 9,
-"left_hip": 10,
-"right_hip": 11,
-"left_knee": 12,
-"right_knee": 13,
-"left_ankle": 14,
-"right_ankle": 15 }
+// this is janky code
+
+const bodyPartToIndexMap = {
+	"nose": 1,
+	"left_eye": 2,
+	"right_eye": 3,
+	"left_ear": 4,
+	"right_ear": 5,
+	"left_shoulder": 6,
+	"right_shoulder": 7,
+	"left_elbow": 8,
+	"right_elbow": 9,
+	"left_wrist": 10,
+	"right_wrist": 11,
+	"left_hip": 12,
+	"right_hip": 13,
+	"left_knee": 14,
+	"right_knee": 15,
+	"left_ankle": 16,
+	"right_ankle": 17
+}
 
 class CanvasBase extends Component {
 	constructor(props) {
 		super(props);
 		this.state = { frame: 0 };
+		this.frame = 0;
 	}
 
 	componentDidMount() {
@@ -41,100 +40,62 @@ class CanvasBase extends Component {
 	}
 
 	drawCurrentFrame() {
-		const { frame } = this.state;
+		const { frame } = this;
 		const frameData = data[frame];
 		if (!frameData) return;
 		this.ctx.clearRect(0, 0, 2000, 1000);
-		for(let p=0; p<frameData.length; p++) {
-			this.drawPerson(frameData[p]);
+		const NUM_PEOPLE_TO_DRAW = frameData.length;
+		for(let person=0; person < NUM_PEOPLE_TO_DRAW; person++) {
+			this.drawPerson(frameData[person]);
+			// There are multiple people per frame
 		}
 	  }
 	
-	drawPerson(current) {
-		// Nose 
-		let nose = current[jawn.nose+1][0];
-		let left_eye = current[jawn.left_eye+1][1];
-		let right_eye = current[jawn.right_eye+1][1];
-		let left_shoulder = current[jawn.left_shoulder+1][1];
-		let right_shoulder = current[jawn.right_shoulder+1][1];
-		let left_elbow = current[jawn.left_elbow+1][1];
-		let right_elbow = current[jawn.right_elbow+1][1];
-		let left_wrist = current[jawn.left_wrist+1][1];
-		let right_wrist = current[jawn.right_wrist+1][1];
-		let left_hip = current[jawn.left_hip+1][1];
-		let right_hip = current[jawn.right_hip+1][1];
-		let left_knee = current[jawn.left_knee+1][1];
-		let right_knee = current[jawn.right_knee+1][1];
-		let left_ankle = current[jawn.left_ankle+1][1];
-		let right_ankle = current[jawn.right_ankle+1][1];
-
-		//head
-		let left_ear = current[jawn.left_ear+1][1];
-		let right_ear = current[jawn.right_ear+1][1];
-		let centerX = (left_ear[0] + right_ear[0])/2;
-		let centerY = (left_ear[1] + right_ear[1])/2
+	drawPerson(coords) {
+		// Draw Head
+		const left_ear_coords = coords[bodyPartToIndexMap.left_ear][1];
+		const right_ear_coords = coords[bodyPartToIndexMap.right_ear][1];
+		let headCenterX = (left_ear_coords[0] + right_ear_coords[0])/2;
+		let headCenterY = (left_ear_coords[1] + right_ear_coords[1])/2
+		const headRadius = 40;
 		this.ctx.beginPath();
-		this.ctx.arc(centerX, centerY, 30, 0, 2 * Math.PI, false);
-		this.ctx.fillStyle = 'black';
+		this.ctx.arc(headCenterX, headCenterY, headRadius, 0, 2 * Math.PI, false);
 		this.ctx.fill();
 
-		this.ctx.beginPath();
-		this.ctx.moveTo(nose[0], nose[1]);
-		this.ctx.lineTo(left_eye[0], left_eye[1]);
-		this.ctx.lineTo(right_eye[0], right_eye[1]);
-		this.ctx.lineTo(nose[0], nose[1]);
-		this.ctx.stroke();
-		this.ctx.beginPath();
-		this.ctx.moveTo(left_shoulder[0], left_shoulder[1]);
-		this.ctx.lineTo(left_elbow[0], left_elbow[1]);
-		this.ctx.lineTo(left_wrist[0], left_wrist[1]);
-		this.ctx.stroke();
-		this.ctx.beginPath();
-		this.ctx.moveTo(right_shoulder[0], right_shoulder[1]);
-		this.ctx.lineTo(right_elbow[0], right_elbow[1]);
-		this.ctx.lineTo(right_wrist[0], right_wrist[1]);
-		this.ctx.stroke();
-		this.ctx.beginPath();
-		this.ctx.moveTo(right_hip[0], right_hip[1]);
-		this.ctx.lineTo(right_knee[0], right_knee[1]);
-		this.ctx.lineTo(right_ankle[0], right_ankle[1]);
-		this.ctx.stroke();
+		// TODO - there are probably more visually appealing ways to draw this
+		const paths = [
+			["left_shoulder", "left_elbow", "left_wrist"],
+			["right_shoulder", "right_elbow", "right_wrist"],
+			["right_hip", "right_knee", "right_ankle"],
+			["left_hip", "left_knee", "left_ankle"],
+			["left_shoulder", "right_shoulder", "right_hip", "left_hip", "left_shoulder"],
+		];
 
-		this.ctx.beginPath();
-		this.ctx.moveTo(centerX, centerY);
-		this.ctx.lineTo(left_hip[0], left_hip[1]);
-		this.ctx.stroke();
-
-		this.ctx.beginPath();
-		this.ctx.moveTo(centerX, centerY);
-		this.ctx.lineTo(right_hip[0], right_hip[1]);
-		this.ctx.stroke();
-
-		this.ctx.beginPath();
-		this.ctx.moveTo(left_hip[0], left_hip[1]);
-		this.ctx.lineTo(left_knee[0], left_knee[1]);
-		this.ctx.lineTo(left_ankle[0], left_ankle[1]);
-		this.ctx.stroke();
+		paths.forEach((path) => {
+			this.ctx.beginPath();
+			let [x, y] = coords[bodyPartToIndexMap[path[0]]][1];
+			this.ctx.moveTo(x, y)
+			for(let i=1; i<path.length; i++) {
+				const bodyPart = path[i];
+				[x, y] = coords[bodyPartToIndexMap[bodyPart]][1];
+				this.ctx.lineTo(x, y);
+			}
+			this.ctx.stroke();
+		})
 	}
 
 
 
 	onAnimationFrame(time) {
-		if (this.state.frame === data.length) {
-			// TODO - replace this to depend on different frame
+		if (this.frame === data.length) {
+			// TODO - pass in data to the component as a prop instead of hard coding it lol
 			this.props.endAnimation();
 			return;
 		}
-		this.setState({
-			frame: this.state.frame + 1
-		});
+		
+		this.frame++;
 
 		this.drawCurrentFrame();
-        // const progress = Math.round(time / this.props.durationMs * 100);
-
-        // if (progress === 100) {
-        //     this.props.endAnimation();
-        // }
     }
 
     render() {
@@ -142,12 +103,13 @@ class CanvasBase extends Component {
 			<div>
 				<canvas className="stick-figure-canvas" ref="canvas" width={2000} height={1000} />
 				{/* <button onClick={this.drawDance.bind(this)}>Play</button>  */}
-				Frame { this.state.frame }
 			</div>
         );
     }
 }
 
-const Canvas = ReactAnimationFrame(CanvasBase);
+// To animate in Javascript, we use "requestAnimationFrame". 
+// Read more here - https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
+const Canvas = ReactAnimationFrame(CanvasBase, 40);
 
 export default Canvas;

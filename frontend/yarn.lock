@@ -8192,6 +8192,11 @@ raw-body@2.4.0:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
+react-animation-frame@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/react-animation-frame/-/react-animation-frame-1.0.2.tgz#d36b7c7b6b734334d4c25d113dfee1c90507d106"
+  integrity sha512-5obTdCIBqHZXcibDitLhUGaLj3ixldtTChc4+HEwcZ2trDmFCToTXbttE69mi+86kXNeY90LWmRwfrJrnGCl7g==
+
 react-app-polyfill@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/react-app-polyfill/-/react-app-polyfill-1.0.6.tgz#890f8d7f2842ce6073f030b117de9130a5f385f0"

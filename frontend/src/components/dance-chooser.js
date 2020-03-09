@@ -22,7 +22,7 @@ class DanceChooser extends Component {
 	  
 	callApi = async () => {
 		this.setState({ loading: true });
-		const response = await fetch('/api/dance/random');
+		const response = await fetch('/api/dance/latin/random');
 		const body = await response.json();
 		if (response.status !== 200) throw Error(body.message);
 		

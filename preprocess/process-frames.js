@@ -23,20 +23,20 @@ async function framesToArray({ id, category}) {
 
 	const [minframe, maxframe] = frameRange;
 	
-	for(let frame=minframe; frame<=maxframe; frame++) {
+	for(let frame=minframe; frame<maxframe; frame++) {
 		try {
 			const file = await fs.readFile(path.join(__dirname, "../densepose/txt/", category, toFileName(id, frame)));
-			motion[frame] = JSON.parse(file.toString());
+			// We do frame-1 because the dataset starts frames at 1
+			motion[frame-1] = JSON.parse(file.toString());
 		} catch (e) {
-			console.error(e);
+			return { err: e };
 		}
 	}
 
-	console.log(motion);
 	if (motion.length === 0) {
 		return { err: `${category}/${id} not found` };
 	} else {
-		return motion;
+		return { id, category, motion };
 	}
 }
 

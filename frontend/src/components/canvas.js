@@ -1,8 +1,5 @@
 import React, { Component } from "react";
 const ReactAnimationFrame = require('react-animation-frame');
-// const data = require("../data/yimGp0XUcEE_motion.json");
-const data = require("../data/y6kboFhoxow_motion.json");
-
 
 // this is janky code
 
@@ -41,7 +38,7 @@ class CanvasBase extends Component {
 
 	drawCurrentFrame() {
 		const { frame } = this;
-		const frameData = data[frame];
+		const frameData = this.props.motion[frame];
 		if (!frameData) return;
 		this.ctx.clearRect(0, 0, 2000, 1000);
 		const NUM_PEOPLE_TO_DRAW = frameData.length;
@@ -87,22 +84,19 @@ class CanvasBase extends Component {
 
 
 	onAnimationFrame(time) {
-		if (this.frame === data.length) {
-			// TODO - pass in data to the component as a prop instead of hard coding it lol
+		if (this.frame === this.props.motion.length) {
 			this.props.endAnimation();
 			return;
 		}
 		
-		this.frame++;
-
 		this.drawCurrentFrame();
-    }
+		this.frame++;
+	}
 
     render() {
         return (
 			<div>
 				<canvas className="stick-figure-canvas" ref="canvas" width={2000} height={1000} />
-				{/* <button onClick={this.drawDance.bind(this)}>Play</button>  */}
 			</div>
         );
     }

@@ -12,7 +12,8 @@
     "promise-fs": "^2.1.1"
   },
   "scripts": {
-    "start": "node server.js",
-    "startdev": "nodemon server.js"
+    "frontend": "cd frontend && yarn start",
+    "server": "node server.js",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn frontend\""
   }
 }

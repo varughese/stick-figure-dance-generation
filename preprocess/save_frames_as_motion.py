@@ -7,6 +7,7 @@
 import os, pathlib, json
 import numpy as np
 from pathlib import Path
+import os.path
 
 
 # In[6]:
@@ -74,9 +75,12 @@ def frames_to_motion(category, dance_id, frames):
     motion = []
     for frame in range(1, frames):
         current_frame_path = "{}{}/{}_{:04d}.json".format(ROOT_DIR, category, dance_id, frame)
-        with open(current_frame_path) as f:
-            data = json.load(f)
-        motion.append(data)
+        if os.path.exists(current_frame_path): 
+            with open(current_frame_path) as f:
+                data = json.load(f)
+            motion.append(data)
+        else:
+            print("ERROR - Missing {}".format(current_frame_path))
     return motion
 
 
@@ -91,10 +95,15 @@ for d in output:
     motion = frames_to_motion(category, dance_id, frames)
     dir_path = '../densepose/full/{}'.format(category)
     Path(dir_path).mkdir(parents=True, exist_ok=True)
-    with open('{}/{}.json'.format(dir_path, dance_id), 'w') as f:
-        json.dump(motion, f)
+    file_path = '{}/{}.json'.format(dir_path, dance_id)
     counter += 1
-    print('{}_{} {}/{}'.format(category, dance_id, counter, total))
+    if not os.path.isfile(file_path):
+        with open(file_path, 'w') as f:
+            json.dump(motion, f)
+            f.close()
+        print('{}_{} {}/{}'.format(category, dance_id, counter, total))
+    else:
+        print('{}_{} Exists'.format(category, dance_id, counter, total))
 
 
 # In[ ]:

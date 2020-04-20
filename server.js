@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
+const fs = require("promise-fs");
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -30,6 +32,17 @@ async function randomDance(category) {
 
 app.get('/api/dance/random', async (req, res) => {
 	res.send(await randomDance());
+});
+
+app.get('/api/dance/gan/:category/:id', async (req, res) => {
+	try {
+		const file = await fs.readFile(path.join(__dirname, "gan/data/", req.params.id + ".json"));
+		const motion = JSON.parse(file.toString());
+		res.send({id: req.params.id, category: req.params.category, motion: motion});
+	} catch (e) {
+		console.error(e);
+		res.send({ err: e.toString(), id: req.params.id});
+	}
 });
 
 app.get('/api/dance/:category/random', async (req, res) => {

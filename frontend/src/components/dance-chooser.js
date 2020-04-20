@@ -22,7 +22,8 @@ class DanceChooser extends Component {
 	  
 	callApi = async () => {
 		this.setState({ loading: true });
-		const response = await fetch('/api/dance/latin/3tST-Vz4Mx8_115');
+		// const response = await fetch('/api/dance/latin/3tST-Vz4Mx8_115');
+		const response = await fetch('api/dance/gan/latin/3tST-Vz4Mx8_115_test');
 		const body = await response.json();
 		if (response.status !== 200) throw Error(body.message);
 		
@@ -37,7 +38,7 @@ class DanceChooser extends Component {
 		return (
 			<div>
 				<Canvas motion={this.state.motion} />
-				<div class="info">
+				<div className="info">
 					<div><span>ID</span> { this.state.id }</div>
 					<div><span>Category</span> { this.state.category }</div>
 				</div>

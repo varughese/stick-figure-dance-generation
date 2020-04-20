@@ -41,12 +41,68 @@ class CanvasBase extends Component {
 		const frameData = this.props.motion[frame];
 		if (!frameData) return;
 		this.ctx.clearRect(0, 0, 2000, 1000);
-		const NUM_PEOPLE_TO_DRAW = 1; // frameData.length;
-		for(let person=0; person < NUM_PEOPLE_TO_DRAW; person++) {
-			this.drawPerson(frameData[person]);
-			// There are multiple people per frame
+
+		// i am writing this code during finals week and rushing,
+		// it is pretty awful
+		let weAreUsingPreprocessedData = frameData[0].length === 2
+		if (weAreUsingPreprocessedData) {
+			this.drawPerson_2(frameData);
+		} else {
+			const NUM_PEOPLE_TO_DRAW = 1; // frameData.length;
+			for(let person=0; person < NUM_PEOPLE_TO_DRAW; person++) {
+				this.drawPerson(frameData[person]);
+				// There are multiple people per frame
+			}
 		}
 	  }
+
+	drawPerson_2(coords) {
+		let bodyPartToIndexMap = {
+			"nose": 0,
+			"left_shoulder": 1,
+			"right_shoulder": 2,
+			"left_elbow": 3,
+			"right_elbow": 4,
+			"left_wrist": 5,
+			"right_wrist": 6,
+			"left_hip": 7,
+			"right_hip": 8,
+			"left_knee": 9,
+			"right_knee": 10,
+			"left_ankle": 11,
+			"right_ankle": 12
+		}
+
+		// Draw Head
+		let nose_coords = coords[bodyPartToIndexMap.nose];
+		let headCenterX = nose_coords[0];
+		let headCenterY = nose_coords[1];
+		const headRadius = 40;
+		this.ctx.beginPath();
+		this.ctx.arc(headCenterX, headCenterY, headRadius, 0, 2 * Math.PI, false);
+		this.ctx.fill();
+
+		// TODO - lol this code is jank
+		const paths = [
+			["left_shoulder", "left_elbow", "left_wrist"],
+			["right_shoulder", "right_elbow", "right_wrist"],
+			["right_hip", "right_knee", "right_ankle"],
+			["left_hip", "left_knee", "left_ankle"],
+			["left_shoulder", "right_shoulder", "right_hip", "left_hip", "left_shoulder"],
+		];
+
+		paths.forEach((path) => {
+			this.ctx.beginPath();
+			let [x, y] = coords[bodyPartToIndexMap[path[0]]];
+			this.ctx.moveTo(x, y)
+			for(let i=1; i<path.length; i++) {
+				const bodyPart = path[i];
+				[x, y] = coords[bodyPartToIndexMap[bodyPart]];
+				this.ctx.lineTo(x, y);
+			}
+			this.ctx.stroke();
+		})		
+	}
 	
 	drawPerson(coords) {
 		// Draw Head

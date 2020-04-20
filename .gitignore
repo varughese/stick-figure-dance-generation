@@ -2,3 +2,4 @@ densepose
 *.gz
 node_modules
 __pycache__
+**_ignoreme.json

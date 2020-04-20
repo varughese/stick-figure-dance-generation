@@ -6,10 +6,15 @@ class DanceChooser extends Component {
 		loading: true,
 		id: '',
 		category: '',
-		motion: ''
+		motion: '',
+		apiRequestPath: 'Enter in an API request here to fetch'
 	};
 
 	componentDidMount() {
+		this.loadFrames();
+	}
+
+	loadFrames = () => {
 		this.callApi()
 			.then(res => this.setState({ 
 				id: res.id,
@@ -22,13 +27,21 @@ class DanceChooser extends Component {
 	  
 	callApi = async () => {
 		this.setState({ loading: true });
-		// const response = await fetch('/api/dance/latin/3tST-Vz4Mx8_115');
-		const response = await fetch('api/dance/gan/latin/3tST-Vz4Mx8_115_test');
+		// TODO lol this code is so messy
+		const apiRequestPath = this.state.apiRequestPath.includes("/api/dance/") ? this.state.apiRequestPath : '/api/dance/latin/3tST-Vz4Mx8_115';
+		const response = await fetch(apiRequestPath);
+		// const response = await fetch('api/dance/gan/latin/sample300_dance_ignoreme');
 		const body = await response.json();
 		if (response.status !== 200) throw Error(body.message);
 		
 		return body;
-	};
+	}
+
+	handleChange = (event) => {
+		this.setState({apiRequestPath: event.target.value});
+	}
+
+
 	
 	render() {
 		if (this.state.loading) {
@@ -41,6 +54,11 @@ class DanceChooser extends Component {
 				<div className="info">
 					<div><span>ID</span> { this.state.id }</div>
 					<div><span>Category</span> { this.state.category }</div>
+					<div>
+						DEBUG
+						<input value={this.state.apiRequestPath} onChange={this.handleChange}></input>
+						<button onClick={this.loadFrames}>Load this Motion Sequence</button>
+					</div>
 				</div>
 			</div>
 		)

@@ -73,11 +73,14 @@ class CanvasBase extends Component {
 			"right_ankle": 12
 		}
 
+		coords = coords.map(([x, y] )=> [90*x + 500, 90*y + 500]);
+
+		const HEAD_RADIUS = 40;
 		// Draw Head
 		let nose_coords = coords[bodyPartToIndexMap.nose];
 		let headCenterX = nose_coords[0];
 		let headCenterY = nose_coords[1];
-		const headRadius = 40;
+		const headRadius = HEAD_RADIUS;
 		this.ctx.beginPath();
 		this.ctx.arc(headCenterX, headCenterY, headRadius, 0, 2 * Math.PI, false);
 		this.ctx.fill();

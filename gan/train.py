@@ -1,31 +1,12 @@
-# Copyright 2019 Christopher John Bayron
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# This file has been created by Christopher John Bayron based on "rnn_gan.py"
-# by Olof Mogren. The referenced code is available in:
-#
-#     https://github.com/olofmogren/c-rnn-gan
-
 import os
 from argparse import ArgumentParser
 
 import torch
 import torch.nn as nn
 from torch import optim
-
-from c_rnn_gan import Generator, Discriminator
 import dataloader as dance_dataloader
+from c_rnn_gan import Generator, Discriminator
+from torch.utils.data import DataLoader
 
 DATA_DIR = 'data'
 CKPT_DIR = 'models'
@@ -38,8 +19,9 @@ D_LRN_RATE = 0.001
 MAX_GRAD_NORM = 5.0
 # following values are modified at runtime
 MAX_SEQ_LEN = 200
-BATCH_SIZE = 32
+BATCH_SIZE = 10
 
+train_dataset = dance_dataloader.train_dataset
 
 EPSILON = 1e-40 # value to use to approximate zero (to prevent undefined results)
 
@@ -91,7 +73,7 @@ def run_training(model, optimizer, criterion, dataloader, freeze_g=False, freeze
     ''' Run single training epoch
     '''
     
-    num_feats = dataloader.get_num_body_parts()
+    num_feats = train_dataset.get_num_body_parts()
     # dataloader.rewind(part='train')
     # batch_meta, batch_song = dataloader.get_batch(BATCH_SIZE, MAX_SEQ_LEN, part='train')
 
@@ -244,18 +226,20 @@ def run_epoch(model, optimizer, criterion, dataloader, ep, num_ep,
         print("Pretraining Epoch %d/%d " % (ep+1, num_ep), "[Freeze G: ", freeze_g, ", Freeze D: ", freeze_d, "]")
     else:
         print("Epoch %d/%d " % (ep+1, num_ep), "[Freeze G: ", freeze_g, ", Freeze D: ", freeze_d, "]")
-
-    print("\t[Training] G_loss: %0.8f, D_loss: %0.8f, D_acc: %0.2f\n"
-          "\t[Validation] G_loss: %0.8f, D_loss: %0.8f, D_acc: %0.2f" %
-          (trn_g_loss, trn_d_loss, trn_acc)
-        #    val_g_loss, val_d_loss, val_acc)
-		   )
+        print("\t[Training] G_loss: %0.8f, D_loss: %0.8f, D_acc: %0.2f" % (trn_g_loss, trn_d_loss, trn_acc))
+#     print("\t[Training] G_loss: %0.8f, D_loss: %0.8f, D_acc: %0.2f\n"
+#           "\t[Validation] G_loss: %0.8f, D_loss: %0.8f, D_acc: %0.2f" %
+#           (trn_g_loss, trn_d_loss, trn_acc)
+#         #    val_g_loss, val_d_loss, val_acc)
+# 		   )
+# FIX
+        
 
     # -- DEBUG --
     # This is for monitoring the current output from generator
     # generate from model then save to MIDI file
     g_states = model['g'].init_hidden(1)
-    num_feats = dataloader.get_num_body_parts()
+    num_feats = train_dataset.get_num_body_parts()
     z = torch.empty([1, MAX_SEQ_LEN, num_feats]).uniform_() # random vector
     if torch.cuda.is_available():
         z = z.cuda()
@@ -266,10 +250,11 @@ def run_epoch(model, optimizer, criterion, dataloader, ep, num_ep,
     dance_data = g_feats.squeeze().cpu()
     dance_data = dance_data.detach().numpy()
 
+    # FIX - this is p bad
     if (ep+1) == num_ep:
-        generated_dance = dataloader.save_data('sample{}_final.dance'.format(num_ep), dance_data)
+        generated_dance = train_dataset.save_data('sample{}_final.dance'.format(num_ep), dance_data)
     else:
-        generated_dance = dataloader.save_data('sample{}.dance'.format(num_ep), dance_data)
+        generated_dance = train_dataset.save_data('sample{}.dance'.format(num_ep), dance_data)
     # -- DEBUG --
 
     return model, trn_acc
@@ -278,8 +263,11 @@ def run_epoch(model, optimizer, criterion, dataloader, ep, num_ep,
 def main(args):
     ''' Training sequence
     '''
-    dataloader = dance_dataloader.train_dataloader
-    num_feats = dataloader.get_num_body_parts()
+    train_loader = DataLoader(train_dataset,
+                            batch_size=BATCH_SIZE,
+                            shuffle=True)
+    dataloader = train_loader
+    num_feats = train_dataset.get_num_body_parts() # FIX
 
     # First checking if GPU is available
     train_on_gpu = torch.cuda.is_available()
@@ -353,29 +341,49 @@ def main(args):
         print("Saved discriminator: %s" % os.path.join(CKPT_DIR, D_FN))
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    ARG_PARSER = ArgumentParser()
-    ARG_PARSER.add_argument('--load_g', action='store_true')
-    ARG_PARSER.add_argument('--load_d', action='store_true')
-    ARG_PARSER.add_argument('--no_save_g', action='store_true')
-    ARG_PARSER.add_argument('--no_save_d', action='store_true')
+# ARG_PARSER = ArgumentParser()
+# ARG_PARSER.add_argument('--load_g', action='store_true')
+# ARG_PARSER.add_argument('--load_d', action='store_true')
+# ARG_PARSER.add_argument('--no_save_g', action='store_true')
+# ARG_PARSER.add_argument('--no_save_d', action='store_true')
 
-    ARG_PARSER.add_argument('--num_epochs', default=300, type=int)
-    ARG_PARSER.add_argument('--batch_size', default=16, type=int)
-    ARG_PARSER.add_argument('--g_lrn_rate', default=0.001, type=float)
-    ARG_PARSER.add_argument('--d_lrn_rate', default=0.001, type=float)
+# ARG_PARSER.add_argument('--num_epochs', default=300, type=int)
+# ARG_PARSER.add_argument('--batch_size', default=16, type=int)
+# ARG_PARSER.add_argument('--g_lrn_rate', default=0.001, type=float)
+# ARG_PARSER.add_argument('--d_lrn_rate', default=0.001, type=float)
 
-    ARG_PARSER.add_argument('--no_pretraining', action='store_true')
-    ARG_PARSER.add_argument('--g_pretraining_epochs', default=5, type=int)
-    ARG_PARSER.add_argument('--d_pretraining_epochs', default=5, type=int)
-    ARG_PARSER.add_argument('--use_sgd', action='store_true')
-    ARG_PARSER.add_argument('--conditional_freezing', action='store_true')
-    ARG_PARSER.add_argument('--label_smoothing', action='store_true')
-    ARG_PARSER.add_argument('--feature_matching', action='store_true')
+# ARG_PARSER.add_argument('--no_pretraining', action='store_true')
+# ARG_PARSER.add_argument('--g_pretraining_epochs', default=5, type=int)
+# ARG_PARSER.add_argument('--d_pretraining_epochs', default=5, type=int)
+# ARG_PARSER.add_argument('--use_sgd', action='store_true')
+# ARG_PARSER.add_argument('--conditional_freezing', action='store_true')
+# ARG_PARSER.add_argument('--label_smoothing', action='store_true')
+# ARG_PARSER.add_argument('--feature_matching', action='store_true')
 
-    ARGS = ARG_PARSER.parse_args()
-    MAX_SEQ_LEN = dance_dataloader.TOTAL_FRAMES
-    BATCH_SIZE = ARGS.batch_size
+class ARGS():
+    def __init__(self):
+        self.load_g =  False
+        self.load_d =  False
+        self.no_save_g =  False
+        self.no_save_d =  False
 
-    main(ARGS)
+        self.num_epochs =  500
+        self.batch_size =  8
+        self.g_lrn_rate =  0.0000001
+        self.d_lrn_rate =  0.0000001
+
+        self.no_pretraining =  False
+        self.g_pretraining_epochs =  5
+        self.d_pretraining_epochs =  5
+        self.use_sgd =  False
+        self.conditional_freezing =  False
+        self.label_smoothing =  False
+        self.feature_matching =  False
+ARGS = ARGS()
+# ARGS = ARG_PARSER.parse_args()
+MAX_SEQ_LEN = 250 # todo make this better
+BATCH_SIZE = ARGS.batch_size
+
+main(ARGS)

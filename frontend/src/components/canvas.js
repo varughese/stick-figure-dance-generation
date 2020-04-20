@@ -41,7 +41,7 @@ class CanvasBase extends Component {
 		const frameData = this.props.motion[frame];
 		if (!frameData) return;
 		this.ctx.clearRect(0, 0, 2000, 1000);
-		const NUM_PEOPLE_TO_DRAW = frameData.length;
+		const NUM_PEOPLE_TO_DRAW = 1; // frameData.length;
 		for(let person=0; person < NUM_PEOPLE_TO_DRAW; person++) {
 			this.drawPerson(frameData[person]);
 			// There are multiple people per frame

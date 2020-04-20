@@ -1,5 +1,5 @@
 import numpy as np
-import json
+import json, codecs
 import os
 import torch
 import torchvision
@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import torch.nn as nn
 import torch.optim as optim
 from torch.autograd.variable import Variable
+from torch.utils.data import DataLoader
 
 # We preprocess'd the file names so we have a index with a list of all frames per dance id
 FRAME_LIST_INDEX = './dance-frame-list.json'
@@ -26,7 +27,7 @@ def from_motion_to_numpy_vector(motion):
     for i, frame in enumerate(motion):
         if len(frame) > 0 and i < TOTAL_FRAMES:
             current_frame_data = frame
-			# TODO extend this past just 1 person
+            # TODO extend this past just 1 person
             person0 = current_frame_data[0][1:]
             current_frame_vector = np.zeros((NUM_BODY_PARTS, 2))
             current_body_part_idx = 0
@@ -36,7 +37,7 @@ def from_motion_to_numpy_vector(motion):
                     current_frame_vector[current_body_part_idx] = body_part_data[1]
                     current_body_part_idx = current_body_part_idx + 1
             motion_vector[i] = current_frame_vector.reshape(NUM_BODY_PARTS * 2)
-	# TODO do data normalization
+    # TODO do data normalization
     return motion_vector
 
 def from_numpy_vector_to_motion_coordinates(motion_vector):
@@ -54,18 +55,18 @@ class LetsDanceDataset(torch.utils.data.Dataset):
         self.root_dir = root_dir
         category = 'latin'
 
-		# TODO make this for more than just latin dances
-        dances - latin_dances
+        # TODO make this for more than just latin dances
+        dances = latin_dances
         
         self.data = np.zeros((len(latin_dances), TOTAL_FRAMES, NUM_BODY_PARTS * 2))
         self.metadata = latin_dances
         
-        for i, dance in enumerate(latin_dances):
-            [category, dance_id, frames] = dance
-            current_frame_path = "{}{}/{}.json".format(root_dir, category, dance_id)
-            with open(current_frame_path) as f:
-                motion = json.load(f)
-            self.data[i] = from_motion_to_numpy_vector(motion)
+        # for i, dance in enumerate(latin_dances):
+        #     [category, dance_id, frames] = dance
+        #     current_frame_path = "{}{}/{}.json".format(root_dir, category, dance_id)
+        #     with open(current_frame_path) as f:
+        #         motion = json.load(f)
+        #     self.data[i] = from_motion_to_numpy_vector(motion)
             
         f.close()
         
@@ -78,23 +79,22 @@ class LetsDanceDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         return torch.Tensor(self.data[index])
 
-	def get_num_body_parts(self):
-		return NUM_BODY_PARTS
+    def get_num_body_parts(self):
+        return NUM_BODY_PARTS * 2 # x + y # FIX
 
-	def save_data(self, filename, data):
-		print("Saving data!")
-		# TODO 
-		with open('./data/' + filename, 'wb') as f:
-			f.write(str(data))
-		
+    def save_data(self, filename, np_array):
+        # TODO 
+        file_path = 'data/' + filename + ".json"
+#         np_array = data.cpu().detach().numpy()
+        d = from_numpy_vector_to_motion_coordinates(np_array).tolist()
+        json.dump(d, codecs.open(file_path, 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True)
     
-
 
 
 # For this first test, we are just using Latin dances
 with open(FRAME_LIST_INDEX) as f:
-	frames_index = json.load(f)
+    frames_index = json.load(f)
 
 latin_dances = list(filter(lambda dance: dance[0] == 'latin' and dance[2] >= TOTAL_FRAMES, frames_index))
-train_dataloader = LetsDanceDataset('../densepose/full/', latin_dances)
-valid_dataloader = LetsDanceDataset('../densepose/full/', latin_dances[40:])
+train_dataset = LetsDanceDataset('../densepose/full/', latin_dances)
+# valid_dataloader = LetsDanceDataset('../densepose/full/', latin_dances[40:])

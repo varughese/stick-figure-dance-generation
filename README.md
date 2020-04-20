@@ -21,7 +21,7 @@ yarn global add concurrently
 yarn install
 cd frontend && yarn install
 cd ..
-yarn dev
+yarn start
 ```
 
 ### 3. Set up neural network

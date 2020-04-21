@@ -75,15 +75,18 @@ class LetsDanceDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         '''
         Returns (category, motion)
-        motion is in shape of `(NUM_FRAMES, 13, 2)`
+        motion is in shape of `(NUM_FRAMES, 26)`
         data is normalized 
         '''
         # todo add transform
         data = torch.Tensor(self.data[index])
-        return normalize(data)
+        data = normalize(data)
+        return data.reshape(250, 26)
 
     def get_num_body_parts(self):
-        return NUM_BODY_PARTS
+        # we treat x and y as different
+        # TODO - this is kinda janky
+        return NUM_BODY_PARTS * 2 
     
 
 # Precomputed
@@ -107,7 +110,7 @@ def save_data(filename, np_array):
     # TODO 
     file_path = 'data/' + filename + ".json"
     d = np_array.tolist()
-#         d = from_numpy_vector_to_motion_coordinates(np_array).tolist()
+    d = from_numpy_vector_to_motion_coordinates(np_array).tolist()
     json.dump(d, codecs.open(file_path, 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True)
 
 # For this first test, we are just using Latin dances

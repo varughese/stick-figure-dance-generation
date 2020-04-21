@@ -41,7 +41,7 @@ def from_motion_to_numpy_vector(motion):
 
 def from_numpy_vector_to_motion_coordinates(motion_vector):
     # Reshape so each element in array is an a NUM_BODY_PARTS x 2 array that has coordinates
-    return motion_vector.reshape(TOTAL_FRAMES, NUM_BODY_PARTS, 2)
+    return motion_vector.reshape(-1, NUM_BODY_PARTS, 2)
 
 class LetsDanceDataset(torch.utils.data.Dataset):
     categories_hash = {'tango': 0, 'break': 1, 'swing': 2,'quickstep': 3,
@@ -65,12 +65,6 @@ class LetsDanceDataset(torch.utils.data.Dataset):
                 motion = json.load(f)
             self.data[i] = from_motion_to_numpy_vector(motion)
         
-        self.transform = transforms.Compose([
-          transforms.ToTensor(),
-          transforms.Normalize(mean=torch.Tensor(self.MEAN),
-                               std=torch.Tensor(self.STD)),
-        ])
-        
         f.close()
         
     def __len__(self):
@@ -87,7 +81,7 @@ class LetsDanceDataset(torch.utils.data.Dataset):
         '''
         # todo add transform
         data = torch.Tensor(self.data[index])
-        data = self.normalize(data)
+        data = normalize(data)
         return data.reshape(250, 26)
 
     def get_num_body_parts(self):
@@ -107,15 +101,14 @@ LETS_DANCE_STD = torch.Tensor([[248.5471,  54.5708], [253.7432,  50.6963], [256.
         [256.7613,  51.5563], [253.6787,  62.7815], [256.8294,  62.8685], [260.5059,  70.0873],
         [262.8192,  68.4242]])
         
-def normalize(self, motion):
+def normalize(motion):
     return (motion - LETS_DANCE_MEAN) / (LETS_DANCE_STD)
 
-def denormalize(self, motion):
-    if motion.shape[0] != 13:
-        motion = motion.reshape(13, 2)
+def denormalize(motion):
+    motion = motion.reshape(-1, 13, 2)
     return (motion * LETS_DANCE_STD) + LETS_DANCE_MEAN
 
-def save_data(self, filename, np_array):
+def save_data(filename, np_array):
     # TODO 
     file_path = 'data/' + filename + ".json"
     d = np_array.tolist()
@@ -129,7 +122,7 @@ with open(FRAME_LIST_INDEX) as f:
 
     
 train_dances= frames_index[:1000]
-valid_dances = frames_index[100:]
+valid_dances = frames_index[1000:]
 train_dataset = LetsDanceDataset('../densepose/full/', train_dances)
 valid_dataset = LetsDanceDataset('../densepose/full/', valid_dances)
 

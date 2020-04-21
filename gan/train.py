@@ -9,6 +9,7 @@ from torch import optim
 import dataloader as dance_dataloader
 from c_rnn_gan import Generator, Discriminator
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 DATA_DIR = 'data'
 CKPT_DIR = 'models'
@@ -24,6 +25,10 @@ MAX_SEQ_LEN = 200
 BATCH_SIZE = 10
 
 EPSILON = 1e-40 # value to use to approximate zero (to prevent undefined results)
+
+experiment_name = str(torch.rand(1).item())[4:]
+print("Experiment Name:", experiment_name)
+writer = SummaryWriter(log_dir='data/' + experiment_name)
 
 class GLoss(nn.Module):
     ''' C-RNN-GAN generator loss
@@ -223,9 +228,7 @@ def run_epoch(model, optimizer, criterion, train_dataloader, valid_dataloader, e
         print("Epoch %d/%d " % (ep+1, num_ep), "[Freeze G: ", freeze_g, ", Freeze D: ", freeze_d, "]")
     print("\t[Training] G_loss: %0.8f, D_loss: %0.8f, D_acc: %0.2f" %  (trn_g_loss, trn_d_loss, trn_acc))
     print("\t[Validation] G_loss: %0.8f, D_loss: %0.8f, D_acc: %0.2f" % (val_g_loss, val_d_loss, val_acc))
-           
-# FIX
-        
+    # writer.add_scalar('Loss/Training', trn_g_loss, ep * len(train_dataloader))
 
     # -- DEBUG --
     # This is for monitoring the current output from generator
@@ -311,11 +314,11 @@ def main(args):
 
     if not args.no_pretraining:
         for ep in range(args.d_pretraining_epochs):
-            model, _ = run_epoch(model, optimizer, criterion, train_loader,
+            model, _ = run_epoch(model, optimizer, criterion, train_loader,valid_loader,
                               ep, args.d_pretraining_epochs, freeze_g=True, pretraining=True)
 
         for ep in range(args.g_pretraining_epochs):
-            model, _ = run_epoch(model, optimizer, criterion, train_loader,
+            model, _ = run_epoch(model, optimizer, criterion, train_loader, valid_loader,
                               ep, args.g_pretraining_epochs, freeze_d=True, pretraining=True)
 
     freeze_d = False

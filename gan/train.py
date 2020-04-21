@@ -78,7 +78,7 @@ def run_training(model, optimizer, criterion, dataloader, freeze_g=False, freeze
     ''' Run single training epoch
     '''
     
-    num_feats = dance_dataloader.NUM_BODY_PARTS
+    num_feats = dance_dataloader.NUM_FEATURES
     # dataloader.rewind(part='train')
     # batch_meta, dance = dataloader.get_batch(BATCH_SIZE, MAX_SEQ_LEN, part='train')
 
@@ -162,7 +162,7 @@ def run_training(model, optimizer, criterion, dataloader, freeze_g=False, freeze
 def run_validation(model, criterion, dataloader):
     ''' Run single validation epoch
     '''
-    num_feats = dance_dataloader.NUM_BODY_PARTS
+    num_feats = dance_dataloader.NUM_FEATURES
 
     model['g'].eval()
     model['d'].eval()
@@ -234,7 +234,7 @@ def run_epoch(model, optimizer, criterion, train_dataloader, valid_dataloader, e
     # This is for monitoring the current output from generator
     # generate from model then save as a json file for motion file
     g_states = model['g'].init_hidden(1)
-    num_feats = dance_dataloader.NUM_BODY_PARTS
+    num_feats = dance_dataloader.NUM_FEATURES
     z = torch.empty([1, MAX_SEQ_LEN, num_feats]).uniform_() # random vector
     if torch.cuda.is_available():
         z = z.cuda()
@@ -268,7 +268,7 @@ def main(args):
                             batch_size=BATCH_SIZE,
                             shuffle=True)
 
-    num_feats = dance_dataloader.NUM_BODY_PARTS
+    num_feats = dance_dataloader.NUM_FEATURES
 
     # First checking if GPU is available
     train_on_gpu = torch.cuda.is_available()

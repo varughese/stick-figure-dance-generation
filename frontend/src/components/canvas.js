@@ -39,7 +39,7 @@ class CanvasBase extends Component {
 	drawCurrentFrame() {
 		const { frame } = this;
 		const frameData = this.props.motion[frame];
-		if (!frameData) return;
+		if (!frameData || !frameData[0]) return;
 		this.ctx.clearRect(0, 0, 2000, 1000);
 
 		// i am writing this code during finals week and rushing,
@@ -143,7 +143,7 @@ class CanvasBase extends Component {
 
 
 	onAnimationFrame(time) {
-		if (this.frame === this.props.motion.length) {
+		if (!this.props.motion || this.frame === this.props.motion.length) {
 			this.props.endAnimation();
 			return;
 		}

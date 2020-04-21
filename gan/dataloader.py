@@ -118,11 +118,13 @@ def save_data(filename, np_array):
 # For this first test, we are just using Latin dances
 with open(FRAME_LIST_INDEX) as f:
     frames_index = json.load(f)
-    np.random.shuffle(frames_index)
 
-    
-train_dances= frames_index[:1000]
-valid_dances = frames_index[1000:]
+
+frames_index = list(filter(lambda dance: dance[0] in ['latin','foxtrot', 'ballet', 'swing'], frames_index)) # Get only latin ones for now
+total_dances = len(frames_index)
+NUMBER_OF_TRAINING = (total_dances // 10) * 8
+train_dances= frames_index[:NUMBER_OF_TRAINING]
+valid_dances = frames_index[NUMBER_OF_TRAINING:]
 train_dataset = LetsDanceDataset('../densepose/full/', train_dances)
 valid_dataset = LetsDanceDataset('../densepose/full/', valid_dances)
 

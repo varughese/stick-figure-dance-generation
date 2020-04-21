@@ -28,7 +28,8 @@ EPSILON = 1e-40 # value to use to approximate zero (to prevent undefined results
 
 experiment_name = str(torch.rand(1).item())[4:]
 print("Experiment Name:", experiment_name)
-writer = SummaryWriter(log_dir='data/' + experiment_name)
+os.makedirs('trials/'+experiment_name, exist_ok=True)
+writer = SummaryWriter(log_dir='trials/' + experiment_name)
 
 class GLoss(nn.Module):
     ''' C-RNN-GAN generator loss
@@ -228,7 +229,13 @@ def run_epoch(model, optimizer, criterion, train_dataloader, valid_dataloader, e
         print("Epoch %d/%d " % (ep+1, num_ep), "[Freeze G: ", freeze_g, ", Freeze D: ", freeze_d, "]")
     print("\t[Training] G_loss: %0.8f, D_loss: %0.8f, D_acc: %0.2f" %  (trn_g_loss, trn_d_loss, trn_acc))
     print("\t[Validation] G_loss: %0.8f, D_loss: %0.8f, D_acc: %0.2f" % (val_g_loss, val_d_loss, val_acc))
-    # writer.add_scalar('Loss/Training', trn_g_loss, ep * len(train_dataloader))
+    
+    writer.add_scalar('G Loss [Training]', trn_g_loss, ep)
+    writer.add_scalar('D Loss [Training]', trn_d_loss, ep)
+    writer.add_scalar('D Acc [Training]', trn_acc, ep)
+    writer.add_scalar('G Loss [Validation]', val_g_loss, ep)
+    writer.add_scalar('D Loss [Validation]', val_d_loss, ep)
+    writer.add_scalar('D Acc [Validation]', val_acc, ep)
 
     # -- DEBUG --
     # This is for monitoring the current output from generator
@@ -248,9 +255,9 @@ def run_epoch(model, optimizer, criterion, train_dataloader, valid_dataloader, e
 
 
     if (ep+1) == num_ep:
-        generated_dance = dance_dataloader.save_data('{}_sample{}_final.dance'.format(experiment_name, num_ep), dance_data)
-    elif ep % 15 == 0:
-        generated_dance = dance_dataloader.save_data('{}_sample{}.dance'.format(experiment_name, num_ep), dance_data)
+        generated_dance = dance_dataloader.save_data('{}_sample{}_final.dance'.format(experiment_name, ep), dance_data)
+    elif ep % 50 == 0:
+        generated_dance = dance_dataloader.save_data('{}_sample{}.dance'.format(experiment_name, ep), dance_data)
     # -- DEBUG --
 
     return model, trn_acc
@@ -263,11 +270,11 @@ def main(args):
     valid_dataset = dance_dataloader.valid_dataset
     train_loader = DataLoader(train_dataset,
                             batch_size=BATCH_SIZE,
-                            hidden_units=512,
+                            hidden_units=1024,
                             shuffle=True)
     valid_loader = DataLoader(valid_dataset,
                             batch_size=BATCH_SIZE,
-                            hidden_units=512,
+                            hidden_units=1024,
                             shuffle=True)
 
     num_feats = dance_dataloader.NUM_FEATURES
@@ -280,8 +287,8 @@ def main(args):
         print('No GPU available, training on CPU.')
 
     model = {
-        'g': Generator(num_feats, use_cuda=train_on_gpu),
-        'd': Discriminator(num_feats, use_cuda=train_on_gpu)
+        'g': Generator(num_feats, hidden_units=1024, drop_prob=0.03, use_cuda=train_on_gpu),
+        'd': Discriminator(num_feats, hidden_units=1024, drop_prob=0.03, use_cuda=train_on_gpu)
     }
 
     if args.use_sgd:
@@ -373,15 +380,15 @@ class ARGS():
         self.no_save_d =  False
 
         self.num_epochs =  1000
-        self.batch_size =  16
-        self.g_lrn_rate =  0.001
-        self.d_lrn_rate =  0.001
+        self.batch_size =  8
+        self.g_lrn_rate =  0.008
+        self.d_lrn_rate =  0.008
 
         self.no_pretraining =  False
         self.g_pretraining_epochs =  5
         self.d_pretraining_epochs =  5
         self.use_sgd =  False
-        self.conditional_freezing =  False
+        self.conditional_freezing =  True
         self.label_smoothing =  False
         self.feature_matching =  True
 ARGS = ARGS()

@@ -57,6 +57,7 @@ class CanvasBase extends Component {
 	  }
 
 	drawPerson_2(coords) {
+		// TODO - lol i have two functions cuz this code is jank
 		let bodyPartToIndexMap = {
 			"nose": 0,
 			"left_shoulder": 1,
@@ -73,7 +74,7 @@ class CanvasBase extends Component {
 			"right_ankle": 12
 		}
 
-		coords = coords.map(([x, y] )=> [90*x + 500, 90*y + 500]);
+		coords = coords.map(([x, y] )=> [x + 500, y + 500]);
 
 		const HEAD_RADIUS = 40;
 		// Draw Head
@@ -85,7 +86,6 @@ class CanvasBase extends Component {
 		this.ctx.arc(headCenterX, headCenterY, headRadius, 0, 2 * Math.PI, false);
 		this.ctx.fill();
 
-		// TODO - lol this code is jank
 		const paths = [
 			["left_shoulder", "left_elbow", "left_wrist"],
 			["right_shoulder", "right_elbow", "right_wrist"],

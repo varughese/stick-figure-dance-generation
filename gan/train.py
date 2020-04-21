@@ -263,9 +263,11 @@ def main(args):
     valid_dataset = dance_dataloader.valid_dataset
     train_loader = DataLoader(train_dataset,
                             batch_size=BATCH_SIZE,
+                            hidden_units=512,
                             shuffle=True)
     valid_loader = DataLoader(valid_dataset,
                             batch_size=BATCH_SIZE,
+                            hidden_units=512,
                             shuffle=True)
 
     num_feats = dance_dataloader.NUM_FEATURES

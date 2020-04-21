@@ -28,9 +28,10 @@ class DanceChooser extends Component {
 	callApi = async () => {
 		this.setState({ loading: true });
 		// TODO lol this code is so messy
-		const apiRequestPath = this.state.apiRequestPath.includes("/api/dance/") ? this.state.apiRequestPath : '/api/dance/latin/3tST-Vz4Mx8_115';
+		// EXAMPLE API REQUEST - '/api/dance/latin/3tST-Vz4Mx8_115'
+		const apiRequestPath = this.state.apiRequestPath.includes("api/dance/") ? this.state.apiRequestPath : '/api/dance/gan/latin/70640182495117_sample1000.dance';
 		const response = await fetch(apiRequestPath);
-		// const response = await fetch('api/dance/gan/latin/sample300_dance_ignoreme');
+		// const response = await fetch('/api/dance/gan/latin/sample300_dance_ignoreme');
 		const body = await response.json();
 		if (response.status !== 200) throw Error(body.message);
 		

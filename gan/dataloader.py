@@ -111,6 +111,8 @@ def normalize(self, motion):
     return (motion - LETS_DANCE_MEAN) / (LETS_DANCE_STD)
 
 def denormalize(self, motion):
+    if motion.shape[0] != 13:
+        motion = motion.reshape(13, 2)
     return (motion * LETS_DANCE_STD) + LETS_DANCE_MEAN
 
 def save_data(self, filename, np_array):

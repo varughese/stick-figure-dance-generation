@@ -16,6 +16,7 @@ FRAME_LIST_INDEX = './dance-frame-list.json'
 
 # np.random.seed(0)
 NUM_BODY_PARTS = 13
+NUM_FEATURES = NUM_BODY_PARTS * 2
 TOTAL_FRAMES = 250
 
 # We have 250 frames. We are going to going to take the 17 body parts, 

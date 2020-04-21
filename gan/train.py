@@ -248,9 +248,9 @@ def run_epoch(model, optimizer, criterion, train_dataloader, valid_dataloader, e
 
 
     if (ep+1) == num_ep:
-        generated_dance = dance_dataloader.save_data('sample{}_final.dance'.format(num_ep), dance_data)
-    else:
-        generated_dance = dance_dataloader.save_data('sample{}.dance'.format(num_ep), dance_data)
+        generated_dance = dance_dataloader.save_data('{}_sample{}_final.dance'.format(experiment_name, num_ep), dance_data)
+    elif ep % 15 == 0:
+        generated_dance = dance_dataloader.save_data('{}_sample{}.dance'.format(experiment_name, num_ep), dance_data)
     # -- DEBUG --
 
     return model, trn_acc
@@ -370,8 +370,8 @@ class ARGS():
         self.no_save_g =  False
         self.no_save_d =  False
 
-        self.num_epochs =  500
-        self.batch_size =  20
+        self.num_epochs =  1000
+        self.batch_size =  16
         self.g_lrn_rate =  0.001
         self.d_lrn_rate =  0.001
 

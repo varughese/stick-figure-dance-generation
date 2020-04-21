@@ -41,7 +41,7 @@ def from_motion_to_numpy_vector(motion):
 
 def from_numpy_vector_to_motion_coordinates(motion_vector):
     # Reshape so each element in array is an a NUM_BODY_PARTS x 2 array that has coordinates
-    return motion_vector.reshape(TOTAL_FRAMES, NUM_BODY_PARTS, 2)
+    return motion_vector.reshape(-1, NUM_BODY_PARTS, 2)
 
 class LetsDanceDataset(torch.utils.data.Dataset):
     categories_hash = {'tango': 0, 'break': 1, 'swing': 2,'quickstep': 3,
@@ -105,6 +105,7 @@ def normalize(motion):
     return (motion - LETS_DANCE_MEAN) / (LETS_DANCE_STD)
 
 def denormalize(motion):
+    motion = motion.reshape(-1, 13, 2)
     return (motion * LETS_DANCE_STD) + LETS_DANCE_MEAN
 
 def save_data(filename, np_array):
@@ -120,8 +121,8 @@ with open(FRAME_LIST_INDEX) as f:
     np.random.shuffle(frames_index)
 
     
-train_dances= frames_index[:10]
-valid_dances = frames_index[10:20]
+train_dances= frames_index[:1000]
+valid_dances = frames_index[1000:]
 train_dataset = LetsDanceDataset('../densepose/full/', train_dances)
 valid_dataset = LetsDanceDataset('../densepose/full/', valid_dances)
 

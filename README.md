@@ -8,7 +8,13 @@ As apart of our Deep Learning final term project, we attempted to use neural net
 View our proposal for this project [here](https://docs.google.com/presentation/d/16DkyjuKUwEGn6KHBLAWM4mkfl6efR9skYgtHtZl7f50/edit#slide=id.p).
 
 ## Architecture
-TODO - Insert our images
+To train these models we used a C-RNN-GAN, heavily adapated from [this research paper](https://arxiv.org/abs/1611.09904) and [this GitHub repo](https://github.com/cjbayron/c-rnn-gan.pytorch).
+### Discriminator
+![https://i.imgur.com/czZf2it.png](https://i.imgur.com/czZf2it.png)
+
+### Generator
+![https://i.imgur.com/qxUOQPD.png](https://i.imgur.com/qxUOQPD.png)
+
 
 ## Set Up
 ### Get  Data

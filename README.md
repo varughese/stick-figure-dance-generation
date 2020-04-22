@@ -3,9 +3,11 @@
 ![https://imgur.com/prHrAVX.gif](https://imgur.com/prHrAVX.gif)
 
 ## What is this
-As apart of our Deep Learning final term project, we attempted to use neural networks to teach a stick figure how to dance. Turned out to be pretty hard (especially since this was our first time using deep learning)
+As apart of our Deep Learning final term project, we attempted to use neural networks to teach a stick figure how to dance. Turned out to be pretty hard (especially since this was our first time seeing deep learning) Above is a visualization of an actual dance, not one that is generated.
 
 View our proposal for this project [here](https://docs.google.com/presentation/d/16DkyjuKUwEGn6KHBLAWM4mkfl6efR9skYgtHtZl7f50/edit#slide=id.p).
+
+View our final presentation for this project [here](https://docs.google.com/presentation/d/1bpcdQxCuz1dOa3TGanriQ1j9IDqPG5souyp6rEA4tt4/edit#slide=id.p)
 
 ## Architecture
 To train these models we used a C-RNN-GAN, heavily adapated from [this research paper](https://arxiv.org/abs/1611.09904) and [this GitHub repo](https://github.com/cjbayron/c-rnn-gan.pytorch).
